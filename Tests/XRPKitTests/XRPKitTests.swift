@@ -504,7 +504,6 @@ final class XRPKitTests: XCTestCase {
             print(dict)
             exp.fulfill()
         })
-        
         // wait three seconds for all outstanding expectations to be fulfilled
         waitForExpectations(timeout: 10)
     }

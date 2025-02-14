@@ -35,7 +35,7 @@ public class XRPRawTransaction {
         return Data(data)
     }
     
-    public func addSignature(wallet: XRPWallet, signature: Data) throws -> XRPRawTransaction {
+    public func addSignature(wallet: XRPWallet, signature: Data) throws {
         let data = serilizeTx(wallet: wallet).bytes
         let algorithm = XRPSeedWallet.getSeedTypeFrom(publicKey: wallet.publicKey).algorithm
         // verify signature
@@ -46,7 +46,6 @@ public class XRPRawTransaction {
         
         // add the signature to the fields
         self.fields["TxnSignature"] = Data(signature).toHexString().uppercased() as Any
-        return self
     }
     
     public func sign(wallet: XRPWallet) throws -> XRPRawTransaction {
