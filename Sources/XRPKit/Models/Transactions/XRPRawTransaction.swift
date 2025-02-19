@@ -20,7 +20,7 @@ public class XRPRawTransaction {
         self.fields = enforceJSONTypes(fields: fields)
     }
     
-    public func serilizeTx(wallet: XRPWallet) -> Data {
+    func serilizeTx(wallet: XRPWallet) -> Data {
         // make sure all fields are compatible
         self.fields = self.enforceJSONTypes(fields: self.fields)
         

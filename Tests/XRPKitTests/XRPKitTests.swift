@@ -500,6 +500,9 @@ final class XRPKitTests: XCTestCase {
         print(wallet.publicKey)
         let amount = try! XRPAmount(drops: 1000000)
         let address = try! XRPAddress(rAddress: "rUQyLm1pnvFPcYgAFFVu7MvBgEYqWEfrjp", tag: 43)
+        let data = XRPPayment(from: wallet, to: address, amount: amount, sourceTag: 67).serilizeTx(wallet: wallet)
+        print(data.count)
+        print(data.toHexString())
         _ = XRPPayment(from: wallet, to: address, amount: amount, sourceTag: 67).send().map({ (dict) in
             print(dict)
             exp.fulfill()

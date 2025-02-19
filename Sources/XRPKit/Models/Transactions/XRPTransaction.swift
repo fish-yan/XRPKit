@@ -49,6 +49,18 @@ public class XRPTransaction: XRPRawTransaction {
         return promise.futureResult
     }
     
+    public func serilize(wallet: XRPWallet) -> EventLoopFuture<Data> {
+        let promise = eventGroup.next().makePromise(of: Data.self)
+        _ = self.autofill().map { (tx) in
+            // sign the transaction (offline)
+            let data = self.serilizeTx(wallet: wallet)
+            promise.succeed(data)
+        }.recover { (error) in
+            promise.fail(error)
+        }
+        return promise.futureResult
+    }
+    
     public func send(isSigned: Bool = false) -> EventLoopFuture<NSDictionary> {
         
         let promise = eventGroup.next().makePromise(of: NSDictionary.self)
