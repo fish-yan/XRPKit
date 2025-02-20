@@ -8,6 +8,7 @@
 import Foundation
 import NIO
 import BigInt
+import secp256k1
 
 let HASH_TX_SIGN: [UInt8] = [0x53,0x54,0x58, 0x00]
 let HASH_TX_MULTISIGN: [UInt8] = [0x53,0x4D,0x54,0x00]
@@ -35,17 +36,20 @@ public class XRPRawTransaction {
         return Data(data)
     }
     
-    public func addSignature(wallet: XRPWallet, signature: Data) throws {
-        let data = serilizeTx(wallet: wallet).bytes
-        let algorithm = XRPSeedWallet.getSeedTypeFrom(publicKey: wallet.publicKey).algorithm
-        // verify signature
-        let verified = try algorithm.verify(signature: signature.bytes, message: data, publicKey: [UInt8](Data(hex: wallet.publicKey)))
-        if !verified {
-            fatalError()
-        }
+    public func addSignature(data: Data) throws {
+        let ctx = secp256k1_context_create(UInt32(SECP256K1_CONTEXT_SIGN))!
+        
+        var signature = secp256k1_ecdsa_signature()
+        secp256k1_ecdsa_signature_parse_compact(ctx, &signature, data.bytes)
+  
+        var tmp: [UInt8] = Array(repeating: 0, count: 72)
+        var size = tmp.count
+        secp256k1_ecdsa_signature_serialize_der(ctx, &tmp[0], &size, &signature)
+        secp256k1_context_destroy(ctx)
+        let signatureData = [UInt8](tmp.prefix(through: size-1))
         
         // add the signature to the fields
-        self.fields["TxnSignature"] = Data(signature).toHexString().uppercased() as Any
+        self.fields["TxnSignature"] = Data(signatureData).toHexString().uppercased() as Any
     }
     
     public func sign(wallet: XRPWallet) throws -> XRPRawTransaction {

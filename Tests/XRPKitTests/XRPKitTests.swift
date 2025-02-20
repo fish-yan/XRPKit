@@ -1,4 +1,5 @@
 import XCTest
+import secp256k1
 @testable import XRPKit
 
 final class XRPKitTests: XCTestCase {
