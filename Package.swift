@@ -18,8 +18,8 @@ let package = Package(
             targets: ["XRPKit"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", .upToNextMinor(from: "1.5.1")),
-        .package(url: "https://github.com/attaswift/BigInt.git", .upToNextMinor(from: "5.4.0")),
+        .package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", from: "1.5.1"),
+        .package(url: "https://github.com/attaswift/BigInt.git", from: "5.4.0"),
         .package(url: "https://github.com/Flight-School/AnyCodable.git", from: "0.2.3"),
 //        .package(url: "https://github.com/apple/swift-nio.git", from: "1.0.0"),
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.40.0"),
