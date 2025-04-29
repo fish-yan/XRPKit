@@ -113,18 +113,18 @@ public class SECP256K1: SigningAlgorithm {
         var _data = Data(sha512HalfHash(data: message))
         
         if secp256k1_ecdsa_sign(ctx!, &sig, _data.getPointer(), _privateKey.getPointer(), secp256k1_nonce_function_rfc6979, nil) == 0 {
-            secp256k1_context_destroy(ctx)
+            secp256k1_context_destroy(ctx!)
             throw SigningError.invalidPrivateKey
         }
         
         var tmp: [UInt8] = Array(repeating: 0, count: 72)
         var size = tmp.count
         if secp256k1_ecdsa_signature_serialize_der(ctx!, &tmp[0], &size, &sig) == 0 {
-            secp256k1_context_destroy(ctx)
+            secp256k1_context_destroy(ctx!)
             throw SigningError.invalidSignature
         }
         
-        secp256k1_context_destroy(ctx)
+        secp256k1_context_destroy(ctx!)
         return [UInt8](tmp.prefix(through: size-1))
         
     }
@@ -139,7 +139,7 @@ public class SECP256K1: SigningAlgorithm {
         var _msgDigest = Data(sha512HalfHash(data: message))
         
         if secp256k1_ecdsa_signature_parse_der(ctx!, &sig, _signatureData.getPointer(), _signatureData.count) == 0 {
-            secp256k1_context_destroy(ctx)
+            secp256k1_context_destroy(ctx!)
             throw SigningError.invalidSignature
         }
         
@@ -147,14 +147,14 @@ public class SECP256K1: SigningAlgorithm {
         let resultParsePublicKey = secp256k1_ec_pubkey_parse(ctx!, &pubKey, _pubKeyData.getPointer(),
                                                              _pubKeyData.count)
         if resultParsePublicKey == 0 {
-            secp256k1_context_destroy(ctx)
+            secp256k1_context_destroy(ctx!)
             throw SigningError.invalidPublicKey
         }
         
         let result = secp256k1_ecdsa_verify(ctx!, &sig, _msgDigest.getPointer(), &pubKey)
         
         
-        secp256k1_context_destroy(ctx)
+        secp256k1_context_destroy(ctx!)
         
         if result == 1 {
             return true
