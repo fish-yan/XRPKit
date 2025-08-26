@@ -52,13 +52,13 @@ enum Bit: Int {
     case zero, one
 }
 
-//extension Data {
-//    var bytes: [Byte] {
-//        var byteArray = [UInt8](repeating: 0, count: self.count)
-//        self.copyBytes(to: &byteArray, count: self.count)
-//        return byteArray
-//    }
-//}
+extension Data {
+    var bytes: [Byte] {
+        var byteArray = [UInt8](repeating: 0, count: self.count)
+        self.copyBytes(to: &byteArray, count: self.count)
+        return byteArray
+    }
+}
 
 extension Byte {
     var bits: [Bit] {
