@@ -1,6 +1,6 @@
 //
 //  XRPSignerListSet.swift
-//  AnyCodable
+//  XRPKit
 //
 //  Created by Mitch Lang on 2/10/20.
 //

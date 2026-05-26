@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import NIO
 
 public class XRPTransaction: XRPRawTransaction {
     
@@ -25,49 +24,30 @@ public class XRPTransaction: XRPRawTransaction {
     }
     
     // autofills ledger sequence, fee, and sequence
-    func autofill() -> EventLoopFuture<XRPTransaction> {
-        
-        let promise = eventGroup.next().makePromise(of: XRPTransaction.self)
-
+    func autofill() async throws -> XRPTransaction {
         // network calls to retrive current account and ledger info
-        _ = XRPLedger.currentLedgerInfo().map { (ledgerInfo) in
-            _ = XRPLedger.getAccountInfo(account: self.wallet.address).map { (accountInfo) in
-                // dictionary containing transaction fields
-                let filledFields: [String:Any] = [
-                    "LastLedgerSequence" : ledgerInfo.index+5,
-                    "Fee" : String(ledgerInfo.minFee), // FIXME: determine fee automatically
-                    "Sequence" : accountInfo.sequence,
-                ]
-                self.fields = self.fields.merging(self.enforceJSONTypes(fields: filledFields)) { (_, new) in new }
-                promise.succeed(self)
-            }.recover { (error) in
-                promise.fail(error)
-            }
-        }.recover { (error) in
-            promise.fail(error)
-        }
-        return promise.futureResult
+        async let ledgerInfo = XRPLedger.currentLedgerInfo()
+        async let accountInfo = XRPLedger.getAccountInfo(account: self.wallet.address)
+        let (ledger, account) = try await (ledgerInfo, accountInfo)
+
+        // dictionary containing transaction fields
+        let filledFields: [String:Any] = [
+            "LastLedgerSequence" : ledger.index+5,
+            "Fee" : String(ledger.minFee), // FIXME: determine fee automatically
+            "Sequence" : account.sequence,
+        ]
+        self.fields = self.fields.merging(self.enforceJSONTypes(fields: filledFields)) { (_, new) in new }
+        return self
     }
     
-    public func send() -> EventLoopFuture<NSDictionary> {
-        
-        let promise = eventGroup.next().makePromise(of: NSDictionary.self)
-        
+    public func send() async throws -> NSDictionary {
         // autofill missing transaction fields (online)
-        _ = self.autofill().map { (tx) in
-            // sign the transaction (offline)
-            let signedTransaction = try! tx.sign(wallet: tx.wallet)
-            
-            // submit the transaction (online)
-            _ = signedTransaction.submit().map { (dict) in
-                promise.succeed(dict)
-            }.recover { (error) in
-                promise.fail(error)
-            }
-        }.recover { (error) in
-            promise.fail(error)
-        }
-        
-        return promise.futureResult
+        let tx = try await self.autofill()
+
+        // sign the transaction (offline)
+        let signedTransaction = try tx.sign(wallet: tx.wallet)
+
+        // submit the transaction (online)
+        return try await signedTransaction.submit()
     }
 }

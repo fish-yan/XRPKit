@@ -1,6 +1,6 @@
 //
 //  XRPEscrowCancel.swift
-//  AnyCodable
+//  XRPKit
 //
 //  Created by Mitch Lang on 2/5/20.
 //

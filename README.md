@@ -64,8 +64,7 @@ let package = Package(
 ## Linux Compatibility
 
 One of the goals of this library is to provide cross-platform support for Linux and support server-side
-Swift, however some features may only be available in iOS/macOS due to a lack of Linux supported
-libraries (ex. WebSockets).  A test_linux.sh file is included that will run tests in a docker container. All
+Swift. A test_linux.sh file is included that will run tests in a docker container. All
 contributions must compile on Linux.
 
 ## Wallets
@@ -254,72 +253,6 @@ import XRPKit
 
 _ = XRPLedger.getBalance(address: "rPdCDje24q4EckPNMQ2fmUAMDoGCCu3eGK").map { (amount) in
     print(amount.prettyPrinted()) // 1,800.000000
-}
-
-```
-
-## WebSocket Support
-
-WebSockets are only supported on Apple platforms through URLSessionWebSocketTask.  On Linux XRPLedger.ws is unavailable.  Support for Linux
-will be possible with the availability of a WebSocket client library.
-
-More functionality to come.
-
-### Example Command
-```swift
-
-import XRPKit
-
-XRPLedger.ws.delegate = self // XRPWebSocketDelegate
-XRPLedger.ws.connect(url: .xrpl_ws_Devnet)
-let parameters: [String: Any] = [
-    "id" : "test",
-    "method" : "fee"
-]
-let data = try! JSONSerialization.data(withJSONObject: parameters, options: [])
-XRPLedger.ws.send(data: data)
-
-```
-
-### Transaction Stream Request
-```swift
-
-import XRPKit
-
-XRPLedger.ws.delegate = self // XRPWebSocketDelegate
-XRPLedger.ws.connect(url: .xrpl_ws_Devnet)
-XRPLedger.ws.subscribe(account: "r34XnDB2zS11NZ1wKJzpU1mjWExGVugTaQ")
-
-```
-
-### Responses/Streams and XRPWebSocketDelegate
-
-```swift
-
-import XRPKit
-
-class MyClass: XRPWebSocketDelegate {
-
-    func onConnected(connection: XRPWebSocket) {
-        
-    }
-    
-    func onDisconnected(connection: XRPWebSocket, error: Error?) {
-        
-    }
-    
-    func onError(connection: XRPWebSocket, error: Error) {
-        
-    }
-    
-    func onResponse(connection: XRPWebSocket, response: XRPWebSocketResponse) {
-        
-    }
-    
-    func onStream(connection: XRPWebSocket, object: NSDictionary) {
-        
-    }
-    
 }
 
 ```

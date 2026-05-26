@@ -20,10 +20,6 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", from: "1.5.1"),
         .package(url: "https://github.com/attaswift/BigInt.git", from: "5.4.0"),
-        .package(url: "https://github.com/Flight-School/AnyCodable.git", from: "0.2.3"),
-//        .package(url: "https://github.com/apple/swift-nio.git", from: "1.0.0"),
-        .package(url: "https://github.com/apple/swift-nio.git", from: "2.40.0"),
-        .package(url: "https://github.com/vapor/websocket-kit.git", from: "2.0.0-beta.2.3"),
         .package(url: "https://github.com/21-DOT-DEV/swift-secp256k1", .upToNextMinor(from: "0.10.0")),
     ],
     targets: [
@@ -32,9 +28,6 @@ let package = Package(
         .target(
             name: "XRPKit",
             dependencies: [
-                .product(name: "WebSocketKit", package: "websocket-kit"),
-                .product(name: "NIO", package: "swift-nio"),
-                "AnyCodable",
                 .product(name: "secp256k1", package: "swift-secp256k1"),
                 "CryptoSwift",
                 "BigInt"

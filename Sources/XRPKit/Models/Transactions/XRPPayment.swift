@@ -1,6 +1,6 @@
 //
 //  XRPPaymentTransaction.swift
-//  AnyCodable
+//  XRPKit
 //
 //  Created by Mitch Lang on 2/4/20.
 //

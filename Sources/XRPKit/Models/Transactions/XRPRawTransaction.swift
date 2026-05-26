@@ -1,12 +1,11 @@
 //
 //  XRPRawTransaction.swift
-//  AnyCodable
+//  XRPKit
 //
 //  Created by Mitch Lang on 2/4/20.
 //
 
 import Foundation
-import NIO
 import BigInt
 
 let HASH_TX_SIGN: [UInt8] = [0x53,0x54,0x58, 0x00]
@@ -93,15 +92,9 @@ public class XRPRawTransaction {
         return self
     }
     
-    public func submit() -> EventLoopFuture<NSDictionary> {
-        let promise = eventGroup.next().makePromise(of: NSDictionary.self)
+    public func submit() async throws -> NSDictionary {
         let tx = Serializer().serializeTx(tx: self.fields, forSigning: false).toHexString().uppercased()
-        _ = XRPLedger.submit(txBlob: tx).map { (tx) in
-            promise.succeed(tx)
-        }.recover { (error) in
-            promise.fail(error)
-        }
-        return promise.futureResult
+        return try await XRPLedger.submit(txBlob: tx)
     }
     
     public func getJSONString() -> String {

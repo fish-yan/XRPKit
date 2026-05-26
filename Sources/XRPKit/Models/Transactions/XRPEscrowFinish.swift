@@ -1,12 +1,11 @@
 //
 //  XRPEscrowFinish.swift
-//  AnyCodable
+//  XRPKit
 //
 //  Created by Mitch Lang on 2/5/20.
 //
 
 import Foundation
-import NIO
 
 public class XRPEscrowFinish: XRPTransaction {
     

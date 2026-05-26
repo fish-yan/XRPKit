@@ -4,7 +4,6 @@ import XCTest
 final class XRPKitTests: XCTestCase {
     
     static var allTests = [
-        ("testWS", testWS),
         ("testFundWallet", testFundWallet),
         ("testRandom", testRandom),
         ("testGenerateWalletFromSeed", testGenerateWalletFromSeed),
@@ -69,19 +68,17 @@ final class XRPKitTests: XCTestCase {
         let signer1 = try! XRPSeedWallet(seed: "shiZka2bSHQKw4CCcZNPFvvA2iAjR")
         let signer2 = try! XRPSeedWallet(seed: "snqFfd21bfALXF1PDj1ymdQcr3Vhu")
         let signer3 = try! XRPSeedWallet(seed: "sEdVWZmeUDgQdMEFKTK9kYVX71FKB7o")
-        _ = try! XRPAccountSet(wallet: wallet, clear: .asfDisableMaster)
-            .autofill()
-            .map({ (tx) in
-                let _tx = try! tx
+        Task {
+            let tx = try! await XRPAccountSet(wallet: wallet, clear: .asfDisableMaster)
+                .autofill()
+            let _tx = try! tx
                 .addMultiSignSignature(wallet: signer3)
                 .addMultiSignSignature(wallet: signer1)
                 .addMultiSignSignature(wallet: signer2)
-                .submit()
-                .map { (dict) in
-                        print(dict)
-                        exp.fulfill()
-                }
-            })
+            let dict = try! await _tx.submit()
+            print(dict)
+            exp.fulfill()
+        }
             
         waitForExpectations(timeout: 10)
     }
@@ -89,9 +86,9 @@ final class XRPKitTests: XCTestCase {
     func testDisableMaster() {
         let exp = expectation(description: "Loading stories")
         let wallet = try! XRPSeedWallet(seed: "ssJip5pqECDQuG5tdSehaKicmkN4d")
-        XRPAccountSet(wallet: wallet, set: .asfDisableMaster)
-            .send()
-            .map { (dict) in
+        Task {
+            let dict = try! await XRPAccountSet(wallet: wallet, set: .asfDisableMaster)
+                .send()
             print(dict)
             exp.fulfill()
         }
@@ -101,7 +98,8 @@ final class XRPKitTests: XCTestCase {
     func testGetSignerList() {
         let exp = expectation(description: "Loading stories")
         let wallet = try! XRPSeedWallet(seed: "ssJip5pqECDQuG5tdSehaKicmkN4d")
-        XRPLedger.getSignerList(address: wallet.address).map { (dict) in
+        Task {
+            let dict = try! await XRPLedger.getSignerList(address: wallet.address)
             print(dict)
             exp.fulfill()
         }
@@ -119,7 +117,8 @@ final class XRPKitTests: XCTestCase {
             return XRPSignerEntry(Account: wallet.address, SignerWeight: 1)
         }
         
-        _ = XRPSignerListSet(wallet: wallet, signerQuorum: 3, signerEntries: signers).send().map { (dict) in
+        Task {
+            let dict = try! await XRPSignerListSet(wallet: wallet, signerQuorum: 3, signerEntries: signers).send()
             print(dict)
             exp.fulfill()
         }
@@ -127,28 +126,6 @@ final class XRPKitTests: XCTestCase {
         waitForExpectations(timeout: 10)
     }
 
-    func testWS() {
-        // create the expectation
-        let exp = expectation(description: "Loading stories")
-
-        // call my asynchronous method
-        let wst = WebSocketTester { (info) in
-            print(info)
-            exp.fulfill()
-        }
-        XRPLedger.ws.delegate = wst
-        XRPLedger.ws.connect(host: XRPLHost.xrpl_ws_Testnet.rawValue)
-        let parameters: [String: Any] = [
-            "id" : "test",
-            "method" : "fee"
-        ]
-        let data = try! JSONSerialization.data(withJSONObject: parameters, options: [])
-        XRPLedger.ws.send(data: data)
-
-        // wait three seconds for all outstanding expectations to be fulfilled
-        waitForExpectations(timeout: 5)
-    }
-    
     func testRippleEpoch() {
         let dateString = "2017-11-13T00:00:00.000Z"
         let formatter = DateFormatter()
@@ -205,7 +182,8 @@ final class XRPKitTests: XCTestCase {
         let exp = expectation(description: "Testing \(#function)")
 
         let wallet = try! XRPSeedWallet(seed: "sEdVLSxBzx6Xi9XTqYj6a88epDSETKR")
-        _ = XRPLedger.getPendingEscrows(address: wallet.address).map { (dict) in
+        Task {
+            let dict = try! await XRPLedger.getPendingEscrows(address: wallet.address)
             print(dict)
             exp.fulfill()
         }
@@ -216,7 +194,8 @@ final class XRPKitTests: XCTestCase {
         let exp = expectation(description: "Testing \(#function)")
         
         let wallet = try! XRPSeedWallet(seed: "sEdVLSxBzx6Xi9XTqYj6a88epDSETKR")
-        _ = XRPLedger.getTxs(account: wallet.address).map { (txs) in
+        Task {
+            _ = try! await XRPLedger.getTxs(account: wallet.address)
             exp.fulfill()
         }
         
@@ -464,7 +443,8 @@ final class XRPKitTests: XCTestCase {
         
         // call my asynchronous method
         let wallet = try! XRPSeedWallet(seed: "ssExhwra2PtqmPWYQvDyHTkycsdGn")
-        _ = XRPLedger.getTxs(account: wallet.address).map { (transactions) in
+        Task {
+            let transactions = try! await XRPLedger.getTxs(account: wallet.address)
             print(transactions)
             exp.fulfill()
         }
@@ -479,7 +459,8 @@ final class XRPKitTests: XCTestCase {
         
         // call my asynchronous method
         let wallet = try! XRPSeedWallet(seed: "sEdVLSxBzx6Xi9XTqYj6a88epDSETKR")
-        _ = XRPLedger.getAccountInfo(account: wallet.address).map { (info) in
+        Task {
+            let info = try! await XRPLedger.getAccountInfo(account: wallet.address)
             print(info)
             exp.fulfill()
         }
@@ -500,10 +481,11 @@ final class XRPKitTests: XCTestCase {
         print(wallet.publicKey)
         let amount = try! XRPAmount(drops: 1000000)
         let address = try! XRPAddress(rAddress: "rUQyLm1pnvFPcYgAFFVu7MvBgEYqWEfrjp", tag: 43)
-        _ = XRPPayment(from: wallet, to: address, amount: amount, sourceTag: 67).send().map({ (dict) in
+        Task {
+            let dict = try! await XRPPayment(from: wallet, to: address, amount: amount, sourceTag: 67).send()
             print(dict)
             exp.fulfill()
-        })
+        }
         
         // wait three seconds for all outstanding expectations to be fulfilled
         waitForExpectations(timeout: 10)
@@ -584,7 +566,8 @@ final class XRPKitTests: XCTestCase {
         
         // call my asynchronous method
         let wallet = try! XRPSeedWallet(seed: "ssExhwra2PtqmPWYQvDyHTkycsdGn")
-        _ = XRPLedger.getBalance(address: wallet.address).map { (result) in
+        Task {
+            let result = try! await XRPLedger.getBalance(address: wallet.address)
             print(result)
             exp.fulfill()
         }
@@ -725,7 +708,8 @@ final class XRPKitTests: XCTestCase {
         let wallet = try! XRPSeedWallet(seed: "ssA9fFYomuCurjdHQgxdLJjz1nhNn")
         let amount = try! XRPAmount(drops: 500000000)
         let address = try! XRPAddress(rAddress: ED_wallet.address)
-        let _ = XRPPayment(from: wallet, to: address, amount: amount).send().map { (result) in
+        Task {
+            let result = try! await XRPPayment(from: wallet, to: address, amount: amount).send()
             print(result)
             exp.fulfill()
         }
@@ -806,7 +790,8 @@ final class XRPKitTests: XCTestCase {
         let amount = try! XRPAmount(drops: 100000000)
         let address = try! XRPAddress(rAddress: "rPdCDje24q4EckPNMQ2fmUAMDoGCCu3eGK")
         
-        _ = XRPPayment(from: wallet, to: address, amount: amount).send().map { (result) in
+        Task {
+            let result = try! await XRPPayment(from: wallet, to: address, amount: amount).send()
             print(result)
         }
         
@@ -833,7 +818,8 @@ final class XRPKitTests: XCTestCase {
         let signedTransaction = try! transaction.sign(wallet: wallet)
         
         // submit the transaction (online)
-        _ = signedTransaction.submit().map { (result) in
+        Task {
+            let result = try! await signedTransaction.submit()
             print(result)
         }
         
@@ -856,7 +842,8 @@ final class XRPKitTests: XCTestCase {
         // autofills missing transaction fields (online)
         // signs transaction (offline)
         // submits transaction (online)
-        _ = partialTransaction.send().map { (txResult) in
+        Task {
+            let txResult = try! await partialTransaction.send()
             print(txResult)
         }
         
@@ -865,7 +852,8 @@ final class XRPKitTests: XCTestCase {
         // ================================================================================================
         // Ledger Info -> Check balance
         // ================================================================================================
-        _ = XRPLedger.getBalance(address: "rPdCDje24q4EckPNMQ2fmUAMDoGCCu3eGK").map { (amount) in
+        Task {
+            let amount = try! await XRPLedger.getBalance(address: "rPdCDje24q4EckPNMQ2fmUAMDoGCCu3eGK")
             print(amount.prettyPrinted()) // 1,800.000000
         }
         

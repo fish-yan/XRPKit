@@ -124,10 +124,6 @@ public extension URL {
     static let xrpl_rpc_MainNetS2 = URL(string: "https://s2.ripple.com:51234/")!
     static let xrpl_rpc_Testnet = URL(string: "https://s.altnet.rippletest.net:51234/")!
     static let xrpl_rpc_Devnet = URL(string: "https://s.devnet.rippletest.net:51234/")!
-    static let xrpl_ws_MainnetS1 = URL(string: "wss://s1.ripple.com/")!
-    static let xrpl_ws_MainnetS2 = URL(string: "wss://s2.ripple.com/")!
-    static let xrpl_ws_Testnet = URL(string: "wss://s.altnet.rippletest.net/")!
-    static let xrpl_ws_Devnet = URL(string: "wss://s.devnet.rippletest.net/")!
 }
 
 public enum XRPLHost: String {
@@ -135,10 +131,6 @@ public enum XRPLHost: String {
     case xrpl_rpc_MainNetS2 = "s2.ripple.com:51234"
     case xrpl_rpc_Testnet = "s.altnet.rippletest.net:51234"
     case xrpl_rpc_Devnet = "s.devnet.rippletest.net:51234"
-    case xrpl_ws_MainnetS1 = "s1.ripple.com"
-    case xrpl_ws_MainnetS2 = "s2.ripple.com"
-    case xrpl_ws_Testnet = "s.altnet.rippletest.net"
-    case xrpl_ws_Devnet = "s.devnet.rippletest.net"
 }
 
 extension Date {

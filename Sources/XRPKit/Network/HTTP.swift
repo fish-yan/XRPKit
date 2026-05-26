@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import NIO
 #if canImport(FoundationNetworking)
     import FoundationNetworking
 #endif
@@ -14,40 +13,31 @@ import NIO
     import CoreFoundation
 #endif
 
-let eventGroup = MultiThreadedEventLoopGroup(numberOfThreads: 4)
-
 class HTTP {
     
     // http call to test linux cross platform
-    static func post(url: URL, parameters: [String: Any]) -> EventLoopFuture<Any> {
-        
-        let promise = eventGroup.next().makePromise(of: Any.self)
-        
-        let httpBody = try! JSONSerialization.data(withJSONObject: parameters, options: [])
+    static func post(url: URL, parameters: [String: Any]) async throws -> Any {
+        let httpBody = try JSONSerialization.data(withJSONObject: parameters, options: [])
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("Application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = httpBody
 
         let session = URLSession.shared
-        session.dataTask(with: request) { (data, response, error) in
-            if let error = error {
-                promise.fail(error)
-            }
-//            if let response = response {
-//                print(response)
-//            }
-            if let data = data {
-                do {
-                    let json = try JSONSerialization.jsonObject(with: data, options: [])
-                    promise.succeed(json)
-                } catch {
-                    promise.fail(error)
+        let data = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Data, Error>) in
+            session.dataTask(with: request) { data, _, error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                    return
                 }
-            }
-        }.resume()
-        
-        return promise.futureResult
-        
+                if let data = data {
+                    continuation.resume(returning: data)
+                    return
+                }
+                continuation.resume(throwing: URLError(.badServerResponse))
+            }.resume()
+        }
+
+        return try JSONSerialization.jsonObject(with: data, options: [])
     }
 }
